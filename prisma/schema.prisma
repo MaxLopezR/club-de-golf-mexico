@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Anuncio {
+  id               String    @id @default(cuid())
+  titulo           String
+  contenido        String
+  estado           String    @default("borrador")
+  fechaPublicacion DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Evento {
+  id          String   @id @default(cuid())
+  titulo      String
+  fecha       DateTime
+  hora        String?
+  lugar       String?
+  descripcion String?
+  createdAt   DateTime @default(now())
+}
+
+model InfoNosotros {
+  id        String   @id @default(cuid())
+  mision    String
+  historia  String
+  directiva String   // JSON string: [{cargo, nombre}]
+  updatedAt DateTime @updatedAt
+}
+
+model EstadoCuenta {
+  id             String          @id @default(cuid())
+  cuotaMensual   Float
+  banco          String
+  clabe          String
+  referencia     String
+  vencimientoDia Int
+  historial      PagoHistorial[]
+  updatedAt      DateTime        @updatedAt
+}
+
+model PagoHistorial {
+  id             String       @id @default(cuid())
+  mes            String
+  monto          Float
+  estado         String
+  estadoCuenta   EstadoCuenta @relation(fields: [estadoCuentaId], references: [id])
+  estadoCuentaId String
+}
+
+model Encuesta {
+  id        String   @id @default(cuid())
+  pregunta  String
+  estado    String   @default("activa")
+  opciones  Opcion[]
+  votos     Voto[]
+  createdAt DateTime @default(now())
+}
+
+model Opcion {
+  id         String   @id @default(cuid())
+  texto      String
+  encuesta   Encuesta @relation(fields: [encuestaId], references: [id], onDelete: Cascade)
+  encuestaId String
+  votos      Voto[]
+}
+
+model Voto {
+  id         String   @id @default(cuid())
+  encuesta   Encuesta @relation(fields: [encuestaId], references: [id], onDelete: Cascade)
+  encuestaId String
+  opcion     Opcion   @relation(fields: [opcionId], references: [id], onDelete: Cascade)
+  opcionId   String
+  ip         String?
+  createdAt  DateTime @default(now())
+}
+
+model Colono {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  nombre    String?
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}

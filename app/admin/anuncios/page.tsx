@@ -1,0 +1,205 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+interface Anuncio {
+  id: string;
+  titulo: string;
+  contenido: string;
+  estado: string;
+  fechaPublicacion: string | null;
+  createdAt: string;
+}
+
+const MAX_TITULO = 100;
+const MAX_CONTENIDO = 500;
+
+export default function AdminAnunciosPage() {
+  const [anuncios, setAnuncios] = useState<Anuncio[]>([]);
+  const [editando, setEditando] = useState<Anuncio | null>(null);
+  const [titulo, setTitulo] = useState("");
+  const [contenido, setContenido] = useState("");
+  const [estado, setEstado] = useState<"publicado" | "borrador">("publicado");
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  async function load() {
+    const data = await fetch("/api/anuncios").then((r) => r.json());
+    setAnuncios(data);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  function startEdit(a: Anuncio) {
+    setEditando(a);
+    setTitulo(a.titulo);
+    setContenido(a.contenido);
+    setEstado(a.estado as "publicado" | "borrador");
+  }
+
+  function resetForm() {
+    setEditando(null);
+    setTitulo("");
+    setContenido("");
+    setEstado("publicado");
+    setMsg("");
+  }
+
+  async function save() {
+    if (!titulo.trim() || !contenido.trim()) {
+      setMsg("Completa título y contenido.");
+      return;
+    }
+    setLoading(true);
+    setMsg("");
+    if (editando) {
+      await fetch(`/api/anuncios/${editando.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ titulo, contenido, estado }),
+      });
+      setMsg("Anuncio actualizado.");
+    } else {
+      await fetch("/api/anuncios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ titulo, contenido, estado }),
+      });
+      setMsg("Anuncio creado.");
+    }
+    setLoading(false);
+    resetForm();
+    load();
+  }
+
+  async function eliminar(id: string) {
+    if (!confirm("¿Eliminar este anuncio?")) return;
+    await fetch(`/api/anuncios/${id}`, { method: "DELETE" });
+    load();
+  }
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold text-[#1A3D2B]">Gestión de Anuncios</h1>
+        <p className="text-gray-500 text-sm mt-1">Crea y administra los avisos para los colonos</p>
+      </div>
+
+      {/* Formulario */}
+      <div className="bg-white rounded-xl border border-[#d4cfc7] p-6 shadow-sm">
+        <h2 className="font-semibold text-[#1A3D2B] mb-4">
+          {editando ? "Editar Anuncio" : "+ Nuevo Anuncio"}
+        </h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-[#1A3D2B] mb-1">
+              Título <span className="text-gray-400 font-normal">({titulo.length}/{MAX_TITULO})</span>
+            </label>
+            <input
+              value={titulo}
+              onChange={(e) => setTitulo(e.target.value.slice(0, MAX_TITULO))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
+              placeholder="Título del anuncio"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#1A3D2B] mb-1">
+              Contenido <span className="text-gray-400 font-normal">({contenido.length}/{MAX_CONTENIDO})</span>
+            </label>
+            <textarea
+              value={contenido}
+              onChange={(e) => setContenido(e.target.value.slice(0, MAX_CONTENIDO))}
+              rows={4}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A] resize-none"
+              placeholder="Texto del anuncio…"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#1A3D2B] mb-1">Estado</label>
+            <select
+              value={estado}
+              onChange={(e) => setEstado(e.target.value as "publicado" | "borrador")}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
+            >
+              <option value="publicado">Publicado</option>
+              <option value="borrador">Borrador</option>
+            </select>
+          </div>
+          {msg && <p className="text-sm text-green-600">{msg}</p>}
+          <div className="flex gap-3">
+            <button
+              onClick={save}
+              disabled={loading}
+              className="bg-[#1A3D2B] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#2A5C40] transition-colors disabled:opacity-60"
+            >
+              {loading ? "Guardando…" : editando ? "Guardar cambios" : "Publicar anuncio"}
+            </button>
+            {editando && (
+              <button
+                onClick={resetForm}
+                className="px-5 py-2 rounded-lg text-sm border border-gray-300 hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Lista */}
+      <div className="bg-white rounded-xl border border-[#d4cfc7] shadow-sm overflow-hidden">
+        <div className="px-5 py-3 border-b border-[#d4cfc7] flex justify-between items-center">
+          <h2 className="font-semibold text-[#1A3D2B]">Anuncios ({anuncios.length})</h2>
+        </div>
+        {anuncios.length === 0 ? (
+          <p className="px-5 py-6 text-gray-500 italic text-sm">Sin anuncios todavía.</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-[#1A3D2B] text-white text-xs uppercase tracking-wide">
+                <th className="text-left px-5 py-2.5">Título</th>
+                <th className="text-left px-5 py-2.5">Estado</th>
+                <th className="text-right px-5 py-2.5">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#d4cfc7]">
+              {anuncios.map((a) => (
+                <tr key={a.id} className="hover:bg-[#F7F3EC]">
+                  <td className="px-5 py-3">
+                    <p className="font-medium text-[#1A3D2B]">{a.titulo}</p>
+                    <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{a.contenido}</p>
+                  </td>
+                  <td className="px-5 py-3">
+                    <span
+                      className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full ${
+                        a.estado === "publicado"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {a.estado}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3 text-right space-x-2">
+                    <button
+                      onClick={() => startEdit(a)}
+                      className="text-[#B8922A] hover:underline text-xs font-medium"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => eliminar(a.id)}
+                      className="text-red-500 hover:underline text-xs font-medium"
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}

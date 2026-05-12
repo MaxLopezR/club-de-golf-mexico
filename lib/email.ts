@@ -1,7 +1,5 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 interface SendBulkEmailParams {
   to: string[];
   subject: string;
@@ -14,6 +12,7 @@ export async function sendBulkEmail({ to, subject, html }: SendBulkEmailParams) 
     return { success: true, simulated: true };
   }
 
+  const resend = new Resend(process.env.RESEND_API_KEY);
   const results = [];
   for (let i = 0; i < to.length; i += 50) {
     const batch = to.slice(i, i + 50);

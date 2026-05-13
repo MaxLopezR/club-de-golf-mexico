@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -14,16 +15,15 @@ export default async function NosotrosPage() {
   return (
     <div>
       {/* Header */}
-      <section className="bg-[#0F2419] relative overflow-hidden py-20 md:py-28">
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 1px 1px, #B8922A 1px, transparent 0)",
-            backgroundSize: "28px 28px",
-          }}
+      <section className="relative overflow-hidden py-20 md:py-28">
+        <Image
+          src="/images/campo-2.jpg"
+          alt="Club de Golf México"
+          fill
+          className="object-cover object-center"
+          priority
         />
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#B8922A]/30 to-transparent" />
+        <div className="absolute inset-0 bg-[#0F2419]/80" />
         <div className="max-w-5xl mx-auto px-6 relative">
           <p className="text-[#B8922A] text-xs uppercase tracking-[0.3em] mb-4">
             Comunidad

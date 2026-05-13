@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 const links = [
   { href: "/", label: "Inicio" },
@@ -13,68 +14,77 @@ const links = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  function isActive(href: string) {
+    return href === "/" ? pathname === "/" : pathname.startsWith(href);
+  }
 
   return (
-    <header className="bg-[#1A3D2B] shadow-md sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 py-0">
+    <header className="bg-[#0F2419] sticky top-0 z-50">
+      <div className="max-w-6xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
-          {/* Logo + nombre */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-full bg-[#B8922A] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-              CGM
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-3 group" onClick={() => setOpen(false)}>
+            <div className="w-8 h-8 border border-[#B8922A] flex items-center justify-center">
+              <span className="text-[#B8922A] text-xs font-serif font-medium tracking-wider">CGM</span>
             </div>
-            <span className="text-white font-semibold text-sm hidden sm:block leading-tight">
+            <span className="text-[#F7F3EC] font-serif text-sm tracking-wide hidden sm:block">
               Club de Golf México
             </span>
           </Link>
 
-          {/* Navegación desktop */}
-          <nav className="hidden md:flex items-center gap-1">
-            {links.map((link) => {
-              const isActive =
-                link.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(link.href);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-[#B8922A] text-white"
-                      : "text-[#F7F3EC]/80 hover:text-white hover:bg-white/10"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
+          {/* Nav desktop */}
+          <nav className="hidden md:flex items-center gap-8">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`text-xs tracking-widest uppercase transition-colors pb-0.5 ${
+                  isActive(link.href)
+                    ? "text-[#B8922A] border-b border-[#B8922A]"
+                    : "text-[#F7F3EC]/60 hover:text-[#F7F3EC]"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
 
-          {/* Navegación móvil — scroll horizontal */}
-          <nav className="flex md:hidden items-center gap-1 overflow-x-auto max-w-[60vw]">
-            {links.map((link) => {
-              const isActive =
-                link.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(link.href);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`whitespace-nowrap px-3 py-1 rounded text-xs font-medium transition-colors ${
-                    isActive
-                      ? "bg-[#B8922A] text-white"
-                      : "text-[#F7F3EC]/80 hover:text-white hover:bg-white/10"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-          </nav>
+          {/* Hamburger button */}
+          <button
+            onClick={() => setOpen(!open)}
+            className="md:hidden flex flex-col gap-1.5 p-2 text-[#F7F3EC]/70 hover:text-[#F7F3EC]"
+            aria-label="Menú"
+          >
+            <span className={`block w-5 h-px bg-current transition-all duration-200 ${open ? "rotate-45 translate-y-[8.5px]" : ""}`} />
+            <span className={`block w-5 h-px bg-current transition-all duration-200 ${open ? "opacity-0" : ""}`} />
+            <span className={`block w-5 h-px bg-current transition-all duration-200 ${open ? "-rotate-45 -translate-y-[8.5px]" : ""}`} />
+          </button>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {open && (
+        <div className="md:hidden border-t border-white/10 bg-[#0F2419]">
+          <nav className="max-w-6xl mx-auto px-6 py-4 flex flex-col gap-1">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className={`px-0 py-3 text-xs tracking-widest uppercase border-b border-white/5 transition-colors ${
+                  isActive(link.href)
+                    ? "text-[#B8922A]"
+                    : "text-[#F7F3EC]/60 hover:text-[#F7F3EC]"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

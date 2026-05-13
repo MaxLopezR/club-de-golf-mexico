@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import Link from "next/link";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -26,34 +27,40 @@ export default async function InicioPage() {
 
   return (
     <div>
-      {/* Hero */}
-      <section className="bg-[#0F2419] relative overflow-hidden py-28 md:py-40">
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 1px 1px, #B8922A 1px, transparent 0)",
-            backgroundSize: "28px 28px",
-          }}
+      {/* Hero con foto real */}
+      <section className="relative overflow-hidden" style={{ minHeight: "90vh" }}>
+        <Image
+          src="/images/campo-1.jpg"
+          alt="Campo de Golf México"
+          fill
+          className="object-cover object-center"
+          priority
         />
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#B8922A]/30 to-transparent" />
-        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#B8922A]/30 to-transparent" />
+        <div className="absolute inset-0 bg-[#0F2419]/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0F2419]/60" />
 
-        <div className="max-w-5xl mx-auto px-6 text-center relative">
-          <p className="text-[#B8922A] text-xs uppercase tracking-[0.3em] mb-8">
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-[90vh] px-6 text-center">
+          <Image
+            src="/images/logo.png"
+            alt="Club de Golf México"
+            width={80}
+            height={80}
+            className="object-contain mb-8 opacity-90"
+          />
+          <p className="text-[#B8922A] text-xs uppercase tracking-[0.35em] mb-6">
             Portal de Colonos
           </p>
-          <h1 className="font-serif font-normal text-[#F7F3EC] text-5xl md:text-7xl leading-[1.05] mb-6">
+          <h1 className="font-serif font-normal text-[#F7F3EC] text-5xl md:text-7xl leading-[1.05] mb-4">
             Residencial<br />
             <em className="text-[#B8922A] not-italic">Club de Golf</em><br />
             México
           </h1>
-          <div className="w-14 h-px bg-[#B8922A] mx-auto my-8" />
-          <p className="text-[#F7F3EC]/50 text-base md:text-lg max-w-md mx-auto font-light tracking-wide">
+          <div className="w-14 h-px bg-[#B8922A] mx-auto my-7" />
+          <p className="text-[#F7F3EC]/60 text-sm md:text-base max-w-md font-light tracking-wide">
             Arenal Tepepan · Tlalpan · Ciudad de México
           </p>
 
-          <div className="flex flex-wrap justify-center gap-3 mt-12">
+          <div className="flex flex-wrap justify-center gap-3 mt-10">
             {[
               { href: "/nosotros", label: "Nosotros" },
               { href: "/calendario", label: "Calendario" },
@@ -63,7 +70,7 @@ export default async function InicioPage() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="px-6 py-2 border border-[#B8922A]/40 text-[#F7F3EC]/60 hover:border-[#B8922A] hover:text-[#B8922A] transition-colors text-xs tracking-widest uppercase rounded-full"
+                className="px-6 py-2 border border-[#F7F3EC]/30 text-[#F7F3EC]/70 hover:border-[#B8922A] hover:text-[#B8922A] transition-colors text-xs tracking-widest uppercase rounded-full backdrop-blur-sm"
               >
                 {item.label}
               </Link>
@@ -115,8 +122,15 @@ export default async function InicioPage() {
 
       {/* Próximos Eventos */}
       {proximosEventos.length > 0 && (
-        <section className="bg-[#1A3D2B]">
-          <div className="max-w-6xl mx-auto px-6 py-20">
+        <section className="relative overflow-hidden">
+          <Image
+            src="/images/campo-2.jpg"
+            alt="Campo de Golf"
+            fill
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-[#1A3D2B]/88" />
+          <div className="relative z-10 max-w-6xl mx-auto px-6 py-20">
             <div className="flex items-end justify-between mb-10">
               <div>
                 <p className="text-[#B8922A] text-xs uppercase tracking-[0.25em] mb-3">
@@ -141,7 +155,7 @@ export default async function InicioPage() {
                 return (
                   <div
                     key={e.id}
-                    className="border border-white/10 rounded-2xl p-6 hover:border-[#B8922A]/40 transition-colors"
+                    className="border border-white/10 rounded-2xl p-6 hover:border-[#B8922A]/40 transition-colors backdrop-blur-sm"
                   >
                     <div className="flex items-start gap-5">
                       <div className="flex-shrink-0 text-center min-w-[48px]">
@@ -174,18 +188,15 @@ export default async function InicioPage() {
             </div>
 
             <div className="mt-6 sm:hidden text-center">
-              <Link
-                href="/calendario"
-                className="text-[#B8922A] text-xs uppercase tracking-widest"
-              >
-                Ver todos los eventos →
+              <Link href="/calendario" className="text-[#B8922A] text-xs uppercase tracking-widest">
+                Ver todos →
               </Link>
             </div>
           </div>
         </section>
       )}
 
-      {/* Quick links strip */}
+      {/* Quick links */}
       <section className="max-w-6xl mx-auto px-6 py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[

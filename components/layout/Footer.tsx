@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -7,9 +8,13 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8 mb-8">
           <div>
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-7 h-7 border border-[#B8922A] flex items-center justify-center">
-                <span className="text-[#B8922A] text-[10px] font-serif font-medium tracking-wider">CGM</span>
-              </div>
+              <Image
+                src="/images/logo.png"
+                alt="Club de Golf México"
+                width={32}
+                height={32}
+                className="object-contain"
+              />
               <span className="text-[#F7F3EC]/80 font-serif text-sm tracking-wide">
                 Club de Golf México
               </span>
@@ -36,7 +41,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-xs">© {new Date().getFullYear()} Residencial Club de Golf México</p>
+          <p className="text-xs">© {new Date().getFullYear()} Residencial Club de Golf México · Est. 1949</p>
           <p className="text-xs text-[#F7F3EC]/25">Portal de Colonos</p>
         </div>
       </div>

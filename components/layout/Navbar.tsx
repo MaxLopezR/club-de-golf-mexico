@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -26,9 +27,13 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group" onClick={() => setOpen(false)}>
-            <div className="w-8 h-8 border border-[#B8922A] flex items-center justify-center">
-              <span className="text-[#B8922A] text-xs font-serif font-medium tracking-wider">CGM</span>
-            </div>
+            <Image
+              src="/images/logo.png"
+              alt="Club de Golf México"
+              width={36}
+              height={36}
+              className="object-contain"
+            />
             <span className="text-[#F7F3EC] font-serif text-sm tracking-wide hidden sm:block">
               Club de Golf México
             </span>
@@ -51,7 +56,7 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Hamburger button */}
+          {/* Hamburger */}
           <button
             onClick={() => setOpen(!open)}
             className="md:hidden flex flex-col gap-1.5 p-2 text-[#F7F3EC]/70 hover:text-[#F7F3EC]"

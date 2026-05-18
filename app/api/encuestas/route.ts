@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
-  const { pregunta, opciones } = await req.json();
+  const { pregunta, opciones, fechaInicio, fechaFin } = await req.json();
   if (!pregunta || !Array.isArray(opciones) || opciones.length < 2) {
     return NextResponse.json({ error: "Pregunta y mínimo 2 opciones requeridas" }, { status: 400 });
   }
@@ -28,6 +28,8 @@ export async function POST(req: NextRequest) {
     data: {
       pregunta: pregunta.slice(0, 200),
       estado: "activa",
+      fechaInicio: fechaInicio ? new Date(fechaInicio) : null,
+      fechaFin: fechaFin ? new Date(fechaFin) : null,
       opciones: {
         create: opciones.map((texto: string) => ({ texto: texto.slice(0, 100) })),
       },

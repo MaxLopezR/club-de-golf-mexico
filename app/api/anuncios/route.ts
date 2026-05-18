@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
-  const { titulo, contenido, estado } = await req.json();
+  const { titulo, contenido, estado, fechaPublicacion } = await req.json();
   if (!titulo || !contenido) {
     return NextResponse.json({ error: "Faltan campos" }, { status: 400 });
   }
@@ -23,7 +23,11 @@ export async function POST(req: NextRequest) {
       titulo: titulo.slice(0, 100),
       contenido: contenido.slice(0, 500),
       estado: estado === "publicado" ? "publicado" : "borrador",
-      fechaPublicacion: estado === "publicado" ? new Date() : null,
+      fechaPublicacion: fechaPublicacion
+        ? new Date(fechaPublicacion)
+        : estado === "publicado"
+        ? new Date()
+        : null,
     },
   });
   return NextResponse.json(anuncio, { status: 201 });

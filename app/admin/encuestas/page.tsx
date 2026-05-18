@@ -7,6 +7,8 @@ interface Encuesta {
   id: string;
   pregunta: string;
   estado: string;
+  fechaInicio: string | null;
+  fechaFin: string | null;
   opciones: Opcion[];
   _count: { votos: number };
   createdAt: string;
@@ -16,6 +18,8 @@ export default function AdminEncuestasPage() {
   const [encuestas, setEncuestas] = useState<Encuesta[]>([]);
   const [pregunta, setPregunta] = useState("");
   const [opciones, setOpciones] = useState(["", ""]);
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -51,10 +55,17 @@ export default function AdminEncuestasPage() {
     await fetch("/api/encuestas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pregunta, opciones: opcionesValidas }),
+      body: JSON.stringify({
+        pregunta,
+        opciones: opcionesValidas,
+        fechaInicio: fechaInicio || undefined,
+        fechaFin: fechaFin || undefined,
+      }),
     });
     setPregunta("");
     setOpciones(["", ""]);
+    setFechaInicio("");
+    setFechaFin("");
     setMsg("Encuesta creada y activada.");
     setLoading(false);
     load();
@@ -120,6 +131,26 @@ export default function AdminEncuestasPage() {
             </button>
           )}
         </div>
+        <div className="flex flex-wrap gap-4">
+          <div>
+            <label className="block text-sm font-medium text-[#1A3D2B] mb-1">Fecha inicio <span className="text-gray-400 font-normal">(opcional)</span></label>
+            <input
+              type="date"
+              value={fechaInicio}
+              onChange={(e) => setFechaInicio(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#1A3D2B] mb-1">Fecha fin <span className="text-gray-400 font-normal">(opcional)</span></label>
+            <input
+              type="date"
+              value={fechaFin}
+              onChange={(e) => setFechaFin(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
+            />
+          </div>
+        </div>
         {msg && <p className="text-sm text-green-600">{msg}</p>}
         <button
           onClick={crear}
@@ -144,6 +175,13 @@ export default function AdminEncuestasPage() {
                   <div>
                     <p className="font-semibold text-[#1A3D2B]">{enc.pregunta}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{enc._count.votos} votos</p>
+                    {(enc.fechaInicio || enc.fechaFin) && (
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {enc.fechaInicio && <>Inicio: {new Date(enc.fechaInicio).toLocaleDateString("es-MX")}</>}
+                        {enc.fechaInicio && enc.fechaFin && " · "}
+                        {enc.fechaFin && <>Fin: {new Date(enc.fechaFin).toLocaleDateString("es-MX")}</>}
+                      </p>
+                    )}
                   </div>
                   <span
                     className={`flex-shrink-0 text-xs font-medium px-2.5 py-0.5 rounded-full ${

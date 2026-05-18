@@ -12,6 +12,8 @@ interface Encuesta {
   id: string;
   pregunta: string;
   estado: string;
+  fechaInicio: string | null;
+  fechaFin: string | null;
   opciones: Opcion[];
   _count: { votos: number };
 }
@@ -106,11 +108,18 @@ export default function EncuestasPage() {
                       key={enc.id}
                       className="bg-white rounded-2xl border-2 border-[#B8922A]/40 p-8 hover:border-[#B8922A] transition-colors"
                     >
-                      <div className="flex items-center gap-2 mb-5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#B8922A] animate-pulse" />
-                        <span className="text-[#B8922A] text-xs uppercase tracking-[0.2em]">
-                          Encuesta activa
-                        </span>
+                      <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#B8922A] animate-pulse" />
+                          <span className="text-[#B8922A] text-xs uppercase tracking-[0.2em]">
+                            Encuesta activa
+                          </span>
+                        </div>
+                        {enc.fechaFin && (
+                          <span className="text-[#1A3D2B]/40 text-xs tracking-wide">
+                            Vigente hasta {new Date(enc.fechaFin).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}
+                          </span>
+                        )}
                       </div>
                       <p className="font-serif text-[#1A3D2B] text-xl md:text-2xl leading-snug mb-7">
                         {enc.pregunta}

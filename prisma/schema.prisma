@@ -64,12 +64,14 @@ model PagoHistorial {
 }
 
 model Encuesta {
-  id        String   @id @default(cuid())
-  pregunta  String
-  estado    String   @default("activa")
-  opciones  Opcion[]
-  votos     Voto[]
-  createdAt DateTime @default(now())
+  id          String    @id @default(cuid())
+  pregunta    String
+  estado      String    @default("activa")
+  fechaInicio DateTime?
+  fechaFin    DateTime?
+  opciones    Opcion[]
+  votos       Voto[]
+  createdAt   DateTime  @default(now())
 }
 
 model Opcion {

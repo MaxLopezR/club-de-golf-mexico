@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 interface DirectivaMember {
   cargo: string;
   nombre: string;
+  foto?: string;
 }
 
 export default async function NosotrosPage() {
@@ -65,11 +66,19 @@ export default async function NosotrosPage() {
                   key={i}
                   className="bg-white rounded-2xl border border-[#e8e3da] p-8 text-center hover:border-[#B8922A]/40 hover:shadow-md transition-all duration-300"
                 >
-                  <div className="w-12 h-12 rounded-full bg-[#1A3D2B] flex items-center justify-center mx-auto mb-5">
-                    <span className="font-serif text-[#B8922A] text-lg font-medium">
-                      {member.nombre.split(" ").pop()?.charAt(0) || "—"}
-                    </span>
-                  </div>
+                  {member.foto ? (
+                    <img
+                      src={member.foto}
+                      alt={member.nombre}
+                      className="w-16 h-16 rounded-full object-cover mx-auto mb-5 border-2 border-[#e8e3da]"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-[#1A3D2B] flex items-center justify-center mx-auto mb-5">
+                      <span className="font-serif text-[#B8922A] text-lg font-medium">
+                        {member.nombre.split(" ").pop()?.charAt(0) || "—"}
+                      </span>
+                    </div>
+                  )}
                   <p className="text-[#B8922A] text-xs uppercase tracking-[0.2em] mb-2">
                     {member.cargo}
                   </p>

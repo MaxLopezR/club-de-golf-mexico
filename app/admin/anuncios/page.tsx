@@ -20,6 +20,7 @@ export default function AdminAnunciosPage() {
   const [titulo, setTitulo] = useState("");
   const [contenido, setContenido] = useState("");
   const [estado, setEstado] = useState<"publicado" | "borrador">("publicado");
+  const [fechaPublicacion, setFechaPublicacion] = useState("");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
 
@@ -35,6 +36,11 @@ export default function AdminAnunciosPage() {
     setTitulo(a.titulo);
     setContenido(a.contenido);
     setEstado(a.estado as "publicado" | "borrador");
+    setFechaPublicacion(
+      a.fechaPublicacion
+        ? new Date(a.fechaPublicacion).toISOString().slice(0, 16)
+        : ""
+    );
   }
 
   function resetForm() {
@@ -42,6 +48,7 @@ export default function AdminAnunciosPage() {
     setTitulo("");
     setContenido("");
     setEstado("publicado");
+    setFechaPublicacion("");
     setMsg("");
   }
 
@@ -56,14 +63,14 @@ export default function AdminAnunciosPage() {
       await fetch(`/api/anuncios/${editando.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ titulo, contenido, estado }),
+        body: JSON.stringify({ titulo, contenido, estado, fechaPublicacion: fechaPublicacion || undefined }),
       });
       setMsg("Anuncio actualizado.");
     } else {
       await fetch("/api/anuncios", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ titulo, contenido, estado }),
+        body: JSON.stringify({ titulo, contenido, estado, fechaPublicacion: fechaPublicacion || undefined }),
       });
       setMsg("Anuncio creado.");
     }
@@ -114,16 +121,30 @@ export default function AdminAnunciosPage() {
               placeholder="Texto del anuncio…"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-[#1A3D2B] mb-1">Estado</label>
-            <select
-              value={estado}
-              onChange={(e) => setEstado(e.target.value as "publicado" | "borrador")}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
-            >
-              <option value="publicado">Publicado</option>
-              <option value="borrador">Borrador</option>
-            </select>
+          <div className="flex flex-wrap gap-4">
+            <div>
+              <label className="block text-sm font-medium text-[#1A3D2B] mb-1">Estado</label>
+              <select
+                value={estado}
+                onChange={(e) => setEstado(e.target.value as "publicado" | "borrador")}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
+              >
+                <option value="publicado">Publicado</option>
+                <option value="borrador">Borrador</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#1A3D2B] mb-1">
+                Fecha de publicación{" "}
+                <span className="text-gray-400 font-normal">(opcional — programa para el futuro)</span>
+              </label>
+              <input
+                type="datetime-local"
+                value={fechaPublicacion}
+                onChange={(e) => setFechaPublicacion(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
+              />
+            </div>
           </div>
           {msg && <p className="text-sm text-green-600">{msg}</p>}
           <div className="flex gap-3">
@@ -170,15 +191,25 @@ export default function AdminAnunciosPage() {
                     <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{a.contenido}</p>
                   </td>
                   <td className="px-5 py-3">
-                    <span
-                      className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full ${
-                        a.estado === "publicado"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
-                    >
-                      {a.estado}
-                    </span>
+                    {(() => {
+                      const isProgramado =
+                        a.estado === "publicado" &&
+                        a.fechaPublicacion &&
+                        new Date(a.fechaPublicacion) > new Date();
+                      return (
+                        <span
+                          className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full ${
+                            isProgramado
+                              ? "bg-blue-100 text-blue-700"
+                              : a.estado === "publicado"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          {isProgramado ? "Programado" : a.estado}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td className="px-5 py-3 text-right space-x-2">
                     <button

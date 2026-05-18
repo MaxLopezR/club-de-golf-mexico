@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-interface DirectivaMember { cargo: string; nombre: string; }
+interface DirectivaMember { cargo: string; nombre: string; foto?: string; }
 
 const MAX_MISION = 600;
 const MAX_HISTORIA = 800;
@@ -27,7 +27,7 @@ export default function AdminNosotrosPage() {
   }, []);
 
   function addMember() {
-    setDirectiva([...directiva, { cargo: "", nombre: "" }]);
+    setDirectiva([...directiva, { cargo: "", nombre: "", foto: "" }]);
   }
 
   function updateMember(i: number, field: keyof DirectivaMember, value: string) {
@@ -71,25 +71,33 @@ export default function AdminNosotrosPage() {
           </button>
         </div>
         {directiva.map((m, i) => (
-          <div key={i} className="flex gap-3 items-start">
+          <div key={i} className="space-y-2">
+            <div className="flex gap-3 items-start">
+              <input
+                value={m.cargo}
+                onChange={(e) => updateMember(i, "cargo", e.target.value)}
+                placeholder="Cargo (ej. Presidente)"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
+              />
+              <input
+                value={m.nombre}
+                onChange={(e) => updateMember(i, "nombre", e.target.value)}
+                placeholder="Nombre completo"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
+              />
+              <button
+                onClick={() => removeMember(i)}
+                className="text-red-400 hover:text-red-600 text-lg px-1"
+              >
+                ×
+              </button>
+            </div>
             <input
-              value={m.cargo}
-              onChange={(e) => updateMember(i, "cargo", e.target.value)}
-              placeholder="Cargo (ej. Presidente)"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
+              value={m.foto || ""}
+              onChange={(e) => updateMember(i, "foto", e.target.value)}
+              placeholder="URL de foto (opcional)"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
             />
-            <input
-              value={m.nombre}
-              onChange={(e) => updateMember(i, "nombre", e.target.value)}
-              placeholder="Nombre completo"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
-            />
-            <button
-              onClick={() => removeMember(i)}
-              className="text-red-400 hover:text-red-600 text-lg px-1"
-            >
-              ×
-            </button>
           </div>
         ))}
       </div>

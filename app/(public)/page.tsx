@@ -1,20 +1,18 @@
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import Image from "next/image";
+import AnunciosGrid from "@/components/public/AnunciosGrid";
+import EventosPreview from "@/components/public/EventosPreview";
 
 export const dynamic = "force-dynamic";
 
-function formatDate(date: Date) {
-  return new Date(date).toLocaleDateString("es-MX", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
-
 export default async function InicioPage() {
+  const now = new Date();
   const anuncios = await prisma.anuncio.findMany({
-    where: { estado: "publicado" },
+    where: {
+      estado: "publicado",
+      fechaPublicacion: { lte: now },
+    },
     orderBy: { fechaPublicacion: "desc" },
     take: 6,
   });
@@ -91,33 +89,10 @@ export default async function InicioPage() {
           <div className="w-10 h-px bg-[#B8922A] mt-4" />
         </div>
 
-        {anuncios.length === 0 ? (
-          <div className="py-16 text-center border border-dashed border-[#d4cfc7] rounded-2xl">
-            <p className="text-[#1A3D2B]/40 text-sm tracking-wide">
-              Sin anuncios publicados por el momento
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {anuncios.map((a) => (
-              <article
-                key={a.id}
-                className="bg-white rounded-2xl border border-[#e8e3da] p-6 hover:border-[#B8922A]/40 hover:shadow-lg transition-all duration-300 group"
-              >
-                <p className="text-[#B8922A] text-xs uppercase tracking-widest mb-3">
-                  {a.fechaPublicacion ? formatDate(a.fechaPublicacion) : ""}
-                </p>
-                <div className="w-6 h-px bg-[#B8922A]/40 mb-3 group-hover:w-10 transition-all duration-300" />
-                <h3 className="font-serif text-lg text-[#1A3D2B] leading-snug mb-3">
-                  {a.titulo}
-                </h3>
-                <p className="text-sm text-[#1A3D2B]/60 leading-relaxed line-clamp-3">
-                  {a.contenido}
-                </p>
-              </article>
-            ))}
-          </div>
-        )}
+        <AnunciosGrid anuncios={anuncios.map(a => ({
+          ...a,
+          fechaPublicacion: a.fechaPublicacion ? a.fechaPublicacion.toISOString() : null,
+        }))} />
       </section>
 
       {/* Próximos Eventos */}
@@ -149,49 +124,13 @@ export default async function InicioPage() {
               </Link>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-              {proximosEventos.map((e) => {
-                const fecha = new Date(e.fecha);
-                return (
-                  <div
-                    key={e.id}
-                    className="border border-white/10 rounded-2xl p-6 hover:border-[#B8922A]/40 transition-colors backdrop-blur-sm"
-                  >
-                    <div className="flex items-start gap-5">
-                      <div className="flex-shrink-0 text-center min-w-[48px]">
-                        <p className="text-[#B8922A] text-xs uppercase tracking-widest leading-none">
-                          {fecha.toLocaleDateString("es-MX", { month: "short" })}
-                        </p>
-                        <p className="font-serif text-4xl text-[#F7F3EC] font-normal leading-tight mt-0.5">
-                          {fecha.getDate()}
-                        </p>
-                      </div>
-                      <div className="border-l border-white/10 pl-5 flex-1">
-                        <p className="font-serif text-[#F7F3EC] text-base leading-snug">
-                          {e.titulo}
-                        </p>
-                        {e.hora && (
-                          <p className="text-[#F7F3EC]/40 text-xs mt-2 tracking-wide">
-                            {e.hora} hrs
-                          </p>
-                        )}
-                        {e.lugar && (
-                          <p className="text-[#F7F3EC]/40 text-xs tracking-wide">
-                            {e.lugar}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-6 sm:hidden text-center">
-              <Link href="/calendario" className="text-[#B8922A] text-xs uppercase tracking-widest">
-                Ver todos →
-              </Link>
-            </div>
+            <EventosPreview eventos={proximosEventos.map(e => ({
+              ...e,
+              fecha: e.fecha.toISOString(),
+              hora: e.hora ?? null,
+              lugar: e.lugar ?? null,
+              descripcion: e.descripcion ?? null,
+            }))} />
           </div>
         </section>
       )}

@@ -19,7 +19,7 @@ export default function AdminAnunciosPage() {
   const [editando, setEditando] = useState<Anuncio | null>(null);
   const [titulo, setTitulo] = useState("");
   const [contenido, setContenido] = useState("");
-  const [estado, setEstado] = useState<"publicado" | "borrador">("publicado");
+  const [estado, setEstado] = useState<"publicado" | "borrador" | "programado">("publicado");
   const [fechaPublicacion, setFechaPublicacion] = useState("");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
@@ -35,7 +35,11 @@ export default function AdminAnunciosPage() {
     setEditando(a);
     setTitulo(a.titulo);
     setContenido(a.contenido);
-    setEstado(a.estado as "publicado" | "borrador");
+    const esProgramado =
+      a.estado === "publicado" &&
+      a.fechaPublicacion &&
+      new Date(a.fechaPublicacion) > new Date();
+    setEstado(esProgramado ? "programado" : (a.estado as "publicado" | "borrador"));
     setFechaPublicacion(
       a.fechaPublicacion
         ? new Date(a.fechaPublicacion).toISOString().slice(0, 16)
@@ -59,18 +63,25 @@ export default function AdminAnunciosPage() {
     }
     setLoading(true);
     setMsg("");
+    const estadoApi = estado === "programado" ? "publicado" : estado;
+    const payload = {
+      titulo,
+      contenido,
+      estado: estadoApi,
+      fechaPublicacion: estado === "programado" ? fechaPublicacion || undefined : undefined,
+    };
     if (editando) {
       await fetch(`/api/anuncios/${editando.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ titulo, contenido, estado, fechaPublicacion: fechaPublicacion || undefined }),
+        body: JSON.stringify(payload),
       });
       setMsg("Anuncio actualizado.");
     } else {
       await fetch("/api/anuncios", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ titulo, contenido, estado, fechaPublicacion: fechaPublicacion || undefined }),
+        body: JSON.stringify(payload),
       });
       setMsg("Anuncio creado.");
     }
@@ -121,30 +132,32 @@ export default function AdminAnunciosPage() {
               placeholder="Texto del anuncio…"
             />
           </div>
-          <div className="flex flex-wrap gap-4">
+          <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-[#1A3D2B] mb-1">Estado</label>
               <select
                 value={estado}
-                onChange={(e) => setEstado(e.target.value as "publicado" | "borrador")}
+                onChange={(e) => setEstado(e.target.value as "publicado" | "borrador" | "programado")}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
               >
                 <option value="publicado">Publicado</option>
                 <option value="borrador">Borrador</option>
+                <option value="programado">Programado</option>
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-[#1A3D2B] mb-1">
-                Fecha de publicación{" "}
-                <span className="text-gray-400 font-normal">(opcional — programa para el futuro)</span>
-              </label>
-              <input
-                type="datetime-local"
-                value={fechaPublicacion}
-                onChange={(e) => setFechaPublicacion(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
-              />
-            </div>
+            {estado === "programado" && (
+              <div>
+                <label className="block text-sm font-medium text-[#1A3D2B] mb-1">
+                  Publicar el día y hora
+                </label>
+                <input
+                  type="datetime-local"
+                  value={fechaPublicacion}
+                  onChange={(e) => setFechaPublicacion(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
+                />
+              </div>
+            )}
           </div>
           {msg && <p className="text-sm text-green-600">{msg}</p>}
           <div className="flex gap-3">

@@ -1,11 +1,77 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface DirectivaMember { cargo: string; nombre: string; foto?: string; }
 
 const MAX_MISION = 600;
 const MAX_HISTORIA = 800;
+
+function resizeToBase64(file: File): Promise<string> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const size = 200;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d")!;
+        const scale = Math.max(size / img.width, size / img.height);
+        const w = img.width * scale;
+        const h = img.height * scale;
+        ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      };
+      img.src = e.target!.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function FotoUpload({ foto, onChange }: { foto?: string; onChange: (val: string) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const base64 = await resizeToBase64(file);
+    onChange(base64);
+    e.target.value = "";
+  }
+
+  return (
+    <div className="flex items-center gap-3 mt-1">
+      {foto ? (
+        <img src={foto} alt="" className="w-10 h-10 rounded-full object-cover border border-[#e8e3da]" />
+      ) : (
+        <div className="w-10 h-10 rounded-full bg-[#f0ede8] border border-[#e8e3da] flex items-center justify-center">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 3a3 3 0 100 6 3 3 0 000-6zM2 13c0-2.21 2.686-4 6-4s6 1.79 6 4" stroke="#9ca3af" strokeWidth="1.2" strokeLinecap="round"/>
+          </svg>
+        </div>
+      )}
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        className="text-xs text-[#B8922A] border border-[#B8922A]/50 px-3 py-1 rounded-lg hover:bg-[#B8922A]/10 transition-colors"
+      >
+        {foto ? "Cambiar foto" : "Subir foto"}
+      </button>
+      {foto && (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+        >
+          Quitar
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function AdminNosotrosPage() {
   const [mision, setMision] = useState("");
@@ -71,7 +137,7 @@ export default function AdminNosotrosPage() {
           </button>
         </div>
         {directiva.map((m, i) => (
-          <div key={i} className="space-y-2">
+          <div key={i} className="border border-[#e8e3da] rounded-xl p-4 space-y-3">
             <div className="flex gap-3 items-start">
               <input
                 value={m.cargo}
@@ -85,19 +151,9 @@ export default function AdminNosotrosPage() {
                 placeholder="Nombre completo"
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
               />
-              <button
-                onClick={() => removeMember(i)}
-                className="text-red-400 hover:text-red-600 text-lg px-1"
-              >
-                ×
-              </button>
+              <button onClick={() => removeMember(i)} className="text-red-400 hover:text-red-600 text-lg px-1">×</button>
             </div>
-            <input
-              value={m.foto || ""}
-              onChange={(e) => updateMember(i, "foto", e.target.value)}
-              placeholder="URL de foto (opcional)"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#B8922A]"
-            />
+            <FotoUpload foto={m.foto} onChange={(val) => updateMember(i, "foto", val)} />
           </div>
         ))}
       </div>
